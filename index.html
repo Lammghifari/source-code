@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku Tamu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            min-width: 60px;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+        
+        .step.active:not(:last-child)::after,
+        .step.completed:not(:last-child)::after {
+            background-color: #28a745;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .step.active .step-circle {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .step.completed .step-circle {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .step-title {
+            font-size: 0.75rem;
+            color: #6c757d;
+            font-weight: 500;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        
+        .step.active .step-title {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .signature-pad {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: white;
+            cursor: crosshair;
+        }
+
+        #signature-pad {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: white;
+            cursor: crosshair;
+        }
+
+
+        
+        /* Mobile optimizations */
+        @media (max-width: 576px) {
+            .stepper {
+                margin-bottom: 1.5rem;
+            }
+            
+            .step-circle {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .step-title {
+                font-size: 0.7rem;
+                margin-top: 0.25rem;
+            }
+            
+            .step:not(:last-child)::after {
+                top: 16px;
+            }
+            
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .card {
+                margin: 0.5rem 0;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn-navigation {
+                min-width: 80px;
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            h5 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem !important;
+            }
+            
+            .form-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .form-control, .form-select {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .mb-3 {
+                margin-bottom: 1rem !important;
+            }
+            
+            .alert {
+                font-size: 0.85rem;
+                padding: 0.75rem;
+            }
+        }
+        
+        .form-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn-navigation {
+            min-width: 100px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .required {
+            color: #dc3545;
+        }
+
+        /* .signature-container {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: white;
+            margin-bottom: 1rem;
+        } */
+        
+        
+        .file-input-label {
+            display: block;
+            padding: 10px;
+            border: 1px dashed #dee2e6;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            border-color: #28a745;
+            background-color: #f8f9fa;
+        }
+        
+        .file-name {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header text-center">
+                        <h4 class="mb-0"><i class="fas fa-book me-2"></i>Buku Tamu</h4>
+                        <p class="mb-0 mt-2 small">Silakan isi data kunjungan Anda</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Stepper -->
+                        <div class="stepper">
+                            <div class="step active" data-step="1">
+                                <div class="step-circle">1</div>
+                                <div class="step-title">Identitas</div>
+                            </div>
+                            <div class="step" data-step="2">
+                                <div class="step-circle">2</div>
+                                <div class="step-title">Kunjungan</div>
+                            </div>
+                            <div class="step" data-step="3">
+                                <div class="step-circle">3</div>
+                                <div class="step-title">Verifikasi</div>
+                            </div>
+                            <!-- <div class="step" data-step="4">
+                                <div class="step-circle">4</div>
+                                <div class="step-title">Verifikasi</div>
+                            </div> -->
+                        </div>
+
+                        <form id="bukuTamuForm">
+                            <!-- Bagian 1: Identitas -->
+                            <div class="form-section active" id="section-1">
+                                <h5 class="text-success mb-4"><i class="fas fa-user me-2"></i>Identitas Tamu</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Nama <span class="required">*</span></label>
+                                    <input type="text" class="form-control" name="nama" placeholder="Mis: Budi Budiman" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">NIK (Optional)</label>
+                                    <input type="text" class="form-control" name="nik" placeholder="Mis: 1220000000001">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Jabatan (Optional)</label>
+                                    <input type="text" class="form-control" name="jabatan" placeholder="Mis: Orang Tua">
+                                </div>
+                            </div>
+
+                            <!-- Bagian 2: Kunjungan -->
+                            <div class="form-section" id="section-2">
+                                <h5 class="text-success mb-4"><i class="fas fa-calendar-day me-2"></i>Data Kunjungan</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Permasalahan Kunjungan <span class="required">*</span></label>
+                                    <input type="text" class="form-control" name="permasalahan" placeholder="Mis: Menjenguk Anak" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Saran dan Harapan <span class="required">*</span></label>
+                                    <textarea class="form-control" name="saran" rows="3" required></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Bagian 3: Kontak -->
+                            <div class="form-section" id="section-3">
+                                <h5 class="text-success mb-4"><i class="fas fa-phone me-2"></i>Kontak Tamu</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">No WhatsApp (Optional)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">+62</span>
+                                        <input type="tel" class="form-control" name="whatsapp" placeholder="Mis: 81234567890">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Foto (Optional)</label>
+                                    <label for="foto" class="file-input-label">
+                                        <i class="fas fa-camera me-2"></i>Pilih File
+                                        <div class="file-name" id="file-name">No file chosen</div>
+                                    </label>
+                                    <input type="file" class="d-none" id="foto" name="foto" accept="image/*">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Tanda Tangan <span class="required">*</span></label>
+                                    <div class="signature-pad">
+                                        <canvas id="signature-pad"></canvas>
+                                    </div>
+                                    <input type="hidden" name="tanda_tangan" id="tanda_tangan" required>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-clear-signature" id="clear-signature">
+                                        <i class="fas fa-eraser me-1"></i>Hapus Tanda Tangan
+                                    </button>
+                                </div>
+                               <div class="alert alert-info">
+                                   <i class="fas fa-info-circle me-2"></i>
+                                   Data yang Anda berikan akan digunakan untuk keperluan administrasi kunjungan.
+                               </div>
+                            </div>
+
+                            
+
+
+                            <!-- Navigation Buttons -->
+                            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+                                <button type="button" class="btn btn-secondary btn-navigation" id="prevBtn" style="display: none;">
+                                    <i class="fas fa-chevron-left me-1"></i><span class="d-none d-sm-inline">Sebelumnya</span><span class="d-sm-none">Prev</span>
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-success btn-navigation" id="nextBtn">
+                                        <span class="d-none d-sm-inline">Selanjutnya</span><span class="d-sm-none">Next</span><i class="fas fa-chevron-right ms-1"></i>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-navigation" id="submitBtn" style="display: none;">
+                                        <i class="fas fa-paper-plane me-1"></i><span class="d-none d-sm-inline">Simpan</span><span class="d-sm-none">Simpan</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        let signaturePad;
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStepperDisplay();
+            setupEventListeners();
+            initSignaturePad();
+        });
+
+        function setupEventListeners() {
+            // Navigation buttons
+            document.getElementById('nextBtn').addEventListener('click', nextStep);
+            document.getElementById('prevBtn').addEventListener('click', prevStep);
+            
+            // Form submit
+            document.getElementById('bukuTamuForm').addEventListener('submit', handleSubmit);
+            
+            // File input
+            document.getElementById('foto').addEventListener('change', function(e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+                document.getElementById('file-name').textContent = fileName;
+            });
+        }
+
+        let initsignaturePad = null; // Deklarasikan di level atas
+
+function initSignaturePad() {
+    const canvas = document.getElementById('signature-pad');
+    if (canvas) {
+        signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgb(255, 255, 255)',
+            penColor: 'rgb(0, 0, 0)'
+        });
+        
+        document.getElementById('clear-signature')?.addEventListener('click', function() {
+            signaturePad.clear();
+        });
+    }
+}
+
+        function nextStep() {
+    if (!validateCurrentStep()) {
+        return;
+    }
+    // Validasi khusus untuk step sebelum terakhir (step 3)
+    if (currentStep === totalSteps - 1) {
+        if (!signaturePad || signaturePad.isEmpty()) {
+            alert('Mohon berikan tanda tangan Anda');
+            return;
+        }
+        document.getElementById('tanda_tangan').value = signaturePad.toDataURL();
+    }
+    
+    currentStep++;
+    updateStepperDisplay();
+    showCurrentSection();
+}
+
+        function prevStep() {
+            currentStep--;
+            updateStepperDisplay();
+            showCurrentSection();
+        }
+
+        function validateCurrentStep() {
+            const currentSection = document.getElementById(`section-${currentStep}`);
+            const requiredFields = currentSection.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                alert('Mohon lengkapi semua field yang wajib diisi (bertanda *)');
+            }
+
+            return isValid;
+        }
+
+        function updateStepperDisplay() {
+            const steps = document.querySelectorAll('.step');
+            const sections = document.querySelectorAll('.form-section');
+            
+            steps.forEach((step, index) => {
+                const stepNumber = index + 1;
+                step.classList.remove('active', 'completed');
+                
+                if (stepNumber === currentStep) {
+                    step.classList.add('active');
+                } else if (stepNumber < currentStep) {
+                    step.classList.add('completed');
+                    step.querySelector('.step-circle').innerHTML = '<i class="fas fa-check"></i>';
+                } else {
+                    step.querySelector('.step-circle').innerHTML = stepNumber;
+                }
+            });
+
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+            
+            if (currentStep === totalSteps) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function showCurrentSection() {
+            const sections = document.querySelectorAll('.form-section');
+            sections.forEach((section, index) => {
+                section.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    section.classList.add('active');
+                }
+            });
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            if (validateCurrentStep()) {
+                // Collect form data
+                const formData = new FormData(e.target);
+                
+                // Here you would normally send the data to your server
+                console.log('Form data:', Object.fromEntries(formData.entries()));
+                
+                // Show success message
+                alert('Data buku tamu berhasil disimpan! Terima kasih atas kunjungan Anda.');
+                
+                // Reset form
+                e.target.reset();
+                signaturePad.clear();
+                document.getElementById('file-name').textContent = 'No file chosen';
+                currentStep = 1;
+                updateStepperDisplay();
+                showCurrentSection();
+            }
+        }
+    </script>
+</body>
+</html>
